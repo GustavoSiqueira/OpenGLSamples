@@ -121,5 +121,9 @@ GLuint loadTexture(const char* imgPath)
 
 	if (textureID == 0) std::cout << "Could not find texture file " << imgPath << endl;
 
+	glBindTexture(GL_TEXTURE_2D, textureID);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+	glGenerateMipmap(GL_TEXTURE_2D);
+
 	return textureID;
 }
