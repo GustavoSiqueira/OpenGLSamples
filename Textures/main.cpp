@@ -30,6 +30,10 @@ int width, height;
 float aspect;
 glm::mat4 pMat, vMat, mMat, mvMat;
 
+void resizeCallback(GLFWwindow* window, int width, int height) {
+	glViewport(0, 0, width, height);
+}
+
 void setupVertices(void) {
 	// 36 vertices, 12 triangles, makes 2x2x2 cube placed at origin
 	float vertexPositions[54] =
@@ -61,6 +65,7 @@ void setupVertices(void) {
 	glBindBuffer(GL_ARRAY_BUFFER, vbo[1]);
 	glBufferData(GL_ARRAY_BUFFER, sizeof(pyrTexCoords), pyrTexCoords, GL_STATIC_DRAW);
 }
+
 void init(GLFWwindow* window) {
 	renderingProgram = createShaderProgram("vertexShader.glsl", "fragShader.glsl");
 
@@ -72,6 +77,7 @@ void init(GLFWwindow* window) {
 	brickTexture = loadTexture("brick01.jpg");
 
 }
+
 void display(GLFWwindow* window, double currentTime) {
 	glClear(GL_DEPTH_BUFFER_BIT);
 	glClearColor(0.0f, 0.0f, 0.25f, 1.0f);
@@ -115,6 +121,7 @@ void display(GLFWwindow* window, double currentTime) {
 
 	glDrawArrays(GL_TRIANGLES, 0, 18);
 }
+
 int main(void) {
 	// main() is unchanged from before
 	if (!glfwInit()) {
@@ -131,6 +138,8 @@ int main(void) {
 	if (glewInit() != GLEW_OK) {
 		exit(EXIT_FAILURE); 
 	}
+
+	glfwSetFramebufferSizeCallback(window, resizeCallback);
 
 	glfwSwapInterval(1);
 
