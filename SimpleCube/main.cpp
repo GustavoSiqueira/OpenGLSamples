@@ -60,6 +60,7 @@ void setupVertices(void) {
 
 	glGenVertexArrays(1, vao);
 	glBindVertexArray(vao[0]);
+
 	glGenBuffers(numVBOs, vbo);
 
 	glBindBuffer(GL_ARRAY_BUFFER, vbo[0]);
