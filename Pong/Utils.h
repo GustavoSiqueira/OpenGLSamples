@@ -79,8 +79,8 @@ GLuint createShaderProgram(const char* vertexShaderPath, const char* fragShaderP
 	GLuint vShader = glCreateShader(GL_VERTEX_SHADER);
 	GLuint fShader = glCreateShader(GL_FRAGMENT_SHADER);
 
-	glShaderSource(vShader, 1, &vshaderSource, NULL);
-	glShaderSource(fShader, 1, &fshaderSource, NULL);
+	glShaderSource(vShader, 1, &vshaderSource, nullptr);
+	glShaderSource(fShader, 1, &fshaderSource, nullptr);
 
 	glCompileShader(vShader);
 
