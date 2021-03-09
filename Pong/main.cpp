@@ -10,7 +10,7 @@
 #include "Utils.h"
 
 #define numVAOs 1
-#define numVBOs 1
+#define numVBOs 2
 
 // Rendering program pointer
 GLuint program;
@@ -59,10 +59,10 @@ float paddleVertices[12] = { 0.1f, -0.1f, 0.0f,
 							0.1f, 0.1f, 0.0f,
 							-0.1f, 0.1f, 0.0f };
 
-float fieldBoundaryVertices[12] = { -1.0f, 1.0f, 0.0f,
-								    1.0f, 1.0f, 0.0f,
-								    1.0f, -1.0f, 0.0f,
-								    -1.0f, -1.0f, 0.0f};
+float fieldBoundaryVertices[12] = { -1.25f, 0.85f, 0.0f,
+									1.25f, 0.85f, 0.0f,
+									1.25f, -0.85f, 0.0f,
+									-1.25f, -0.85f, 0.0f };
 
 void setupVertices() {
 	glGenVertexArrays(numVAOs, vao);
@@ -85,8 +85,6 @@ void drawBuffer(int bufferIndex, int numVertices, GLenum mode) {
 	glDepthFunc(GL_LEQUAL);
 	glDrawArrays(mode, 0, numVertices);
 }
-
-int numVerts = 0;
 
 void drawRect(glm::vec3 location, float scaleX, float scaleY, GLenum mode, int bufferIndex) {
 	glUseProgram(program);
@@ -115,11 +113,11 @@ void display(GLFWwindow* window, float dt) {
 	drawRect(paddleLocation, 0.25f, 1.25f, GL_TRIANGLE_STRIP, 0);
 	drawRect(pluckLocation, 0.1f, 0.1f, GL_TRIANGLE_STRIP, 0);
 	drawRect(enemyLocation, 0.25f, 1.25f, GL_TRIANGLE_STRIP, 0);
-	drawRect(upperLeftEdge, 11.0f, 7.0f, GL_LINE_LOOP, 0);
+	drawRect(upperLeftEdge, 1.0f, 1.0f, GL_LINE_LOOP, 1);
 }
 
 glm::vec3 randomVersor() {
-	return glm::vec3(-2.0f, 0.0f, 0.0f);
+	return glm::vec3(-0.7f, 0.5f, 0.0f);
 }
 
 void init(GLFWwindow* window) {
@@ -127,7 +125,7 @@ void init(GLFWwindow* window) {
 	setupVertices();
 
 	glfwGetFramebufferSize(window, &width, &height);
-	aspectRatio = (float)width / (float)height;
+	aspectRatio = static_cast<float>(width) / static_cast<float>(height);
 
 	paddleLocation = paddleStartPos;
 	pluckLocation = pluckStartPos;
@@ -139,8 +137,17 @@ void init(GLFWwindow* window) {
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height) {
 	glViewport(0, 0, width, height);
-	aspectRatio = (float)width / (float)height;
+	aspectRatio = static_cast<float>(width) / static_cast<float>(height);
 }
+
+void update(float dt) {
+	if (abs(pluckLocation.y) >= maxY + 0.12f && glm::dot(pluckSpeed, pluckLocation) > 0)
+		pluckSpeed.y *= -1;
+
+	pluckLocation += pluckSpeed * dt;
+}
+
+float targetFrameTime = 1.0f / 144.0f;
 
 int main()
 {
@@ -151,12 +158,12 @@ int main()
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
-	const GLFWvidmode* videoMode = glfwGetVideoMode(glfwGetPrimaryMonitor());
-	GLFWwindow* window = glfwCreateWindow(videoMode->width, videoMode->height, "PongGL", NULL, NULL);
+	auto videoMode = glfwGetVideoMode(glfwGetPrimaryMonitor());
+	auto window = glfwCreateWindow(videoMode->width, videoMode->height, "PongGL", NULL, NULL);
 
 	glfwMakeContextCurrent(window);
 
-	auto glewInitResult = glewInit();
+	const auto glewInitResult = glewInit();
 
 	if (glewInitResult != GLEW_OK)
 		return -1;
@@ -166,21 +173,24 @@ int main()
 
 	init(window);
 
-	float dt = 0.0f,
+	auto dt = 0.0f,
 		time = 0.0f,
 		lastTime = 0.0f;
 
 	while (!glfwWindowShouldClose(window))
 	{
-		time = (float)glfwGetTime();
+		time = static_cast<float>(glfwGetTime()); //time in ms
 		dt = time - lastTime;
 
 		processInput(window, dt);
+		update(dt);
 		display(window, dt);
 		glfwPollEvents();
 		glfwSwapBuffers(window);
 
 		lastTime = time;
+
+		while (glfwGetTime() - time < targetFrameTime) {}
 	}
 
 	glfwDestroyWindow(window);
